@@ -1,6 +1,23 @@
+import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { Configuration, OpenAIApi } from "openai";
+import clientPromise from "../../lib/mongodb";
 
-export default async function handler(req, res) {
+export default withApiAuthRequired(async function handler(req, res) {
+  const {user} = await getSession(req, res);
+  const client = await clientPromise;
+  const db = client.db("BlogStandard");
+  const userProfile = await db.collection("users").findOne({
+    auth0Id: user.sub
+  });
+
+  console.log("🚀 ~ file: generatePost.js:7 ~ handler ~ user:", {user, userProfile})
+
+  // if user is not logged in or doesn't have tokens - through an error
+  if (!userProfile?.availableTokens) {
+    res.status(403);
+    return;
+  }
+
   const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -70,6 +87,27 @@ export default async function handler(req, res) {
   const title = titleResponse?.data?.choices[0]?.message?.content || "";
   const metaDescription = metaDescriptionResponse?.data?.choices[0]?.message?.content || "";
 
+  await db.collection("users").updateOne({
+    auth0Id: user.sub
+  }, {
+    $inc: {
+      availableTokens: -1
+    }
+  });
+
+  // A comparison of the best jazz musicians of the 70's and 80's
+  // jazz music, best jazz musicians
+
+  const post = await db.collection("posts").insertOne({
+    postContent: postContent || '',
+    title: title || '',
+    metaDescription: metaDescription || '',
+    topic,
+    keywords,
+    userId: userProfile._id,
+    created: new Date()
+  });
+
   res.status(200).json({
     post: {
       postContent,
@@ -77,8 +115,4 @@ export default async function handler(req, res) {
       metaDescription
     }
   });
-
-
-  // A comparison of the best jazz musicians of the 70's and 80's
-  // jazz music, best jazz musicians
-}
+});

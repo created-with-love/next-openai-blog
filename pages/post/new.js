@@ -33,6 +33,7 @@ export default function NewPost() {
             className="resize-none border border-slate-500 w-full block my-2 px-4 py-2 rounded-sm"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
+            autoComplete="on"
           />
         </div>
         <div>
@@ -43,6 +44,7 @@ export default function NewPost() {
             className="resize-none border border-slate-500 w-full block my-2 px-4 py-2 rounded-sm"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
+            autoComplete="on"
           />
         </div>
         <button className="btn" type="submit">
