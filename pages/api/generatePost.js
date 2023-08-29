@@ -10,8 +10,6 @@ export default withApiAuthRequired(async function handler(req, res) {
     auth0Id: user.sub
   });
 
-  console.log("🚀 ~ file: generatePost.js:7 ~ handler ~ user:", {user, userProfile})
-
   // if user is not logged in or doesn't have tokens - through an error
   if (!userProfile?.availableTokens) {
     res.status(403);
@@ -47,8 +45,9 @@ export default withApiAuthRequired(async function handler(req, res) {
       { role: "system", content: "You are a blog post generator" },
       {
         role: "user",
-        content: `Write a long and detailed SEO-friendly blog post about ${topic}, that targets the following comma-separated keywords: ${keywords}.
-      The response should be formatted in SEO-friendly HTML, limited to the following HTML tags: p, h1, h2, h3, h4, h5, h6, strong, li, ol, ul`,
+        content: `Write a long and detailed SEO-friendly blog post about ${topic}, that targets the following comma-separated keywords: ${keywords}. 
+        The response should be formatted in SEO-friendly HTML, 
+        limited to the following HTML tags: p, h1, h2, h3, h4, h5, h6, strong, i, ul, li, ol.`,
       },
       // assistant role means it will be an answer to us from chat
       {
@@ -57,7 +56,7 @@ export default withApiAuthRequired(async function handler(req, res) {
       },
       {
         role: "user",
-        content: "Generate appropriate title tag text for the above blog text",
+        content: "Generate appropriate title text for the above blog text",
       },
     ],
   });
@@ -69,8 +68,9 @@ export default withApiAuthRequired(async function handler(req, res) {
       { role: "system", content: "You are a blog post generator" },
       {
         role: "user",
-        content: `Write a long and detailed SEO-friendly blog post about ${topic}, that targets the following comma-separated keywords: ${keywords}.
-      The response should be formatted in SEO-friendly HTML, limited to the following HTML tags: p, h1, h2, h3, h4, h5, h6, strong, li, ol, ul`,
+        content: `Write a long and detailed SEO-friendly blog post about ${topic}, that targets the following comma-separated keywords: ${keywords}. 
+        The response should be formatted in SEO-friendly HTML, 
+        limited to the following HTML tags: p, h1, h2, h3, h4, h5, h6, strong, i, ul, li, ol`,
       },
       // assistant role means it will be an answer to us from chat
       {
@@ -79,7 +79,7 @@ export default withApiAuthRequired(async function handler(req, res) {
       },
       {
         role: "user",
-        content: "Generate SEO-friendly meta description content for the above blog post",
+        content: "Generate SEO-friendly meta description content for the above blog post and return only content of it",
       },
     ],
   });
@@ -109,10 +109,6 @@ export default withApiAuthRequired(async function handler(req, res) {
   });
 
   res.status(200).json({
-    post: {
-      postContent,
-      title,
-      metaDescription
-    }
+    postId: post.insertedId
   });
 });
