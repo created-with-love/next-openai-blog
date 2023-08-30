@@ -9,6 +9,8 @@ export default function TokenTopup() {
     });
     const json = await result.json();
     console.log('addTokensHandler: ', json);
+
+    window.location.href = json.session.url;
   }
 
   return (
