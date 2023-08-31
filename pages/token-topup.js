@@ -14,9 +14,10 @@ export default function TokenTopup() {
   }
 
   return (
-    <div>
-      <h1>TokenTopup page</h1>
-      <button className="btn" onClick={addTokensHandler}>Add tokens</button>
+    <div className="h-full overwlow-hidden p-4 flex flex-col items-center">
+      <h1 className="text-center">Checkout</h1>
+      <p className="block max-w-sm mb-5">You will be redirected to the Stripe payment page to gain tokens. With these tokens you can make API calls and generate new posts.</p>
+      <button className="btn max-w-sm" onClick={addTokensHandler}>Add tokens</button>
     </div>
   );
 };
