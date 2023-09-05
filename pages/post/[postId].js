@@ -7,15 +7,16 @@ import { faHashtag } from "@fortawesome/free-solid-svg-icons";
 import { getAppProps } from "../../utils/getAppProps";
 
 export default function Post(props) {
-  console.log("🚀 ~ file: [postId].js:7 ~ Post ~ props:", props)
+  const cleanedTitle = props.title.replace(/<title>|<\/title>/gi, '');
+  
   return (
     <div className="overlof-auto h-full">
-      <div className="max-w-screen-sm mx-auto">
+      <div className="max-w-screen-sm mx-auto pb-6">
         <div className="text-sm font-bold mt-6 p-2 bg-stone-200 rounded-sm">
             SEO title and meta description
         </div>
         <div className="p-4 my-2 border border-stone-200 rounded-md">
-          <div className="text-blue-600 text-2xl font-bold">{props.title}</div>
+          <div className="text-blue-600 text-2xl font-bold">{cleanedTitle}</div>
           <div className="mt-2">{props.metaDescription}</div>
         </div>
 

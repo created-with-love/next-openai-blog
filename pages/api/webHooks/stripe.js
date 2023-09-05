@@ -22,7 +22,6 @@ const handler = async (req, res) => {
 
     try {
       event = await verifyStripe({req, stripe, endpointSecret});
-
     } catch (e) {
       console.log("ERROR:", e);
     }
@@ -35,9 +34,7 @@ const handler = async (req, res) => {
         const paymentIntent = event.data.object;
         const auth0Id = paymentIntent.metadata.sub;
 
-        console.log('AUTH 0 ID: ', paymentIntent);
-
-        const userProfile = await db.collection("users").updateOne(
+        await db.collection("users").updateOne(
           {
             auth0Id,
           },

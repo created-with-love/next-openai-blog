@@ -34,6 +34,8 @@ export default function NewPost() {
     }
   };
 
+  const isSubmitDisabled = !keywords.trim() || !topic.trim();
+
   return (
     <div className="h-full overwlow-hidden">
       {generating && (
@@ -57,6 +59,7 @@ export default function NewPost() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 autoComplete="on"
+                maxLength={150}
               />
             </div>
             <div>
@@ -68,10 +71,11 @@ export default function NewPost() {
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
                 autoComplete="on"
+                maxLength={80}
               />
               <small className="block mb-2">Separate keywords with comma</small>
             </div>
-            <button className="btn" type="submit">
+            <button className="btn" type="submit" disabled={isSubmitDisabled}>
               Generate
             </button>
           </form>
@@ -89,6 +93,15 @@ NewPost.getLayout = function getLayout(page, pageProps) {
 export const getServerSideProps = withPageAuthRequired({
   async getServerSideProps(ctx) {
     const props = await getAppProps(ctx);
+
+    if (!props.availableTokens) {
+      return {
+        redirect: {
+          destination: "/token-topup",
+          permanent: false
+        }
+      }
+    }
 
     return {
       props,
