@@ -10,14 +10,22 @@ import PostContext from "../../context/postContext";
 import { Logo } from "../Logo";
 
 
-export const AppLayout = ({ children, availableTokens, posts: postsFromSSR, postId }) => {
+export const AppLayout = ({ children, availableTokens, posts: postsFromSSR, postId, postCreated }) => {
   const { user, error } = useUser();
 
   const {setPostsFromSSR, posts, getPosts, noMorePosts} = useContext(PostContext);
 
   useEffect(() => {
     setPostsFromSSR(postsFromSSR);
-  }, [postsFromSSR, setPostsFromSSR]);
+
+    if (postId) {
+      const exists = postsFromSSR.find(post => post._id === postId);
+
+      if (!exists) {
+        getPosts({getNewerPosts: true, lastPostDate: postCreated});
+      }
+    }
+  }, [postsFromSSR, setPostsFromSSR, postId, postCreated, getPosts]);
   
   return (
     <div className="grid grid-cols-[400px_1fr] h-screen max-h-screen">

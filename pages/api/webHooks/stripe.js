@@ -1,7 +1,8 @@
 import Cors from 'micro-cors';
 import stripeInit from 'stripe';
 import verifyStripe from '@webdeveducation/next-verify-stripe';
-import clientPromise from '../../../lib/mongodb';
+import { MongoClient } from 'mongodb';
+
 
 const cors = Cors({
     allowMethods: ['POST', 'HEAD']
@@ -28,13 +29,15 @@ const handler = async (req, res) => {
 
     switch (event.type) {
       case "payment_intent.succeeded": {
-        const client = await clientPromise;
+        const client = new MongoClient(process.env.MONGODB_URI);
+        global.mongoClientPromise = client.connect();
         const db = client.db("BlogStandard");
 
         const paymentIntent = event.data.object;
         const auth0Id = paymentIntent.metadata.sub;
+        console.log("🚀 ~ auth0Id:", auth0Id)
 
-        await db.collection("users").updateOne(
+        const userProfile = await db.collection("users").updateOne(
           {
             auth0Id,
           },

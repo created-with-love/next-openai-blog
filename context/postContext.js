@@ -8,6 +8,18 @@ export const PostsProvider = ({children}) => {
     const [posts, setPosts] = useState([]);
     const [noMorePosts, setNoMorePosts] = useState(false);
 
+    const deletePost = useCallback((postId) => {
+        setPosts(postsArray => {
+            const results = [];
+            postsArray.forEach(post => {
+                if (post._id !== postId) {
+                    results.push(post);
+                }
+            });
+            return results;
+        });
+    }, []);
+
     const setPostsFromSSR = useCallback((postsFromSSR = []) => {
         setPosts(value => {
             const newPosts = [...value];
@@ -20,13 +32,13 @@ export const PostsProvider = ({children}) => {
         });
     }, []);
 
-    const getPosts = useCallback(async ({lastPostDate}) => {
+    const getPosts = useCallback(async ({lastPostDate, getNewerPosts = false}) => {
         const result = await fetch(`/api/getPosts`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({lastPostDate})
+            body: JSON.stringify({lastPostDate, getNewerPosts})
         });
 
         const json = await result.json();
@@ -48,5 +60,5 @@ export const PostsProvider = ({children}) => {
 
     }, []);
 
-    return <PostContext.Provider value={{posts, setPostsFromSSR, getPosts, noMorePosts}}>{children}</PostContext.Provider>
+    return <PostContext.Provider value={{posts, setPostsFromSSR, getPosts, noMorePosts, deletePost}}>{children}</PostContext.Provider>
 }

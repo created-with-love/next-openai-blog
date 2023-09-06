@@ -1,5 +1,6 @@
 import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import clientPromise from "../../lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export default withApiAuthRequired(async function handler(req, res) {
     try {
@@ -10,22 +11,16 @@ export default withApiAuthRequired(async function handler(req, res) {
             auth0Id: sub
         });
 
-        const {lastPostDate, getNewerPosts} = req.body;
+        const {postId} = req.body;
 
-        const posts = await db
-          .collection("posts")
-          .find({
+        await db.collection("posts").deleteOne({
             userId: userProfile._id,
-            created: { [getNewerPosts ? "$gt" : "$lt"]: new Date(lastPostDate) },
-          })
-          .limit(getNewerPosts ? 0 : 5)
-          .sort({ created: -1 })
-          .toArray();
-        
-        res.status(200).json({posts});
-        return;
+            _id: new ObjectId(postId)
+        });
 
-    } catch(e) {
-      console.log("e:", e)
+        res.status(200).json({success: true});
+    } catch (e) {
+        console.log("Error trying to delete a post: ", e);
     }
+    return;
 })
