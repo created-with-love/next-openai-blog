@@ -25,42 +25,57 @@ const handler = async (req, res) => {
       event = await verifyStripe({req, stripe, endpointSecret});
     } catch (e) {
       console.log("ERROR:", e);
+      return res.status(500).json({ error: 'Something went wrong' });
     }
 
     switch (event.type) {
       case "payment_intent.succeeded": {
-        const client = new MongoClient(process.env.MONGODB_URI);
-        global.mongoClientPromise = client.connect();
-        const db = client.db("BlogStandard");
+        try {
+          const client = new MongoClient(process.env.MONGODB_URI);
+          await client.connect();
+          const db = client.db('BlogStandard');
 
-        const paymentIntent = event.data.object;
-        const auth0Id = paymentIntent.metadata.sub;
-        console.log("🚀 ~ auth0Id:", auth0Id)
+          const paymentIntent = event.data.object;
+          const auth0Id = paymentIntent.metadata.sub;
 
-        const userProfile = await db.collection("users").updateOne(
-          {
-            auth0Id,
-          },
-          {
-            $inc: {
-              availableTokens: 10,
+          const { value: userProfile } = await db.collection('users').findOneAndUpdate(
+            { auth0Id },
+            {
+              $inc: {
+                availableTokens: 10,
+              },
+              $setOnInsert: {
+                auth0Id,
+              },
             },
-            $setOnInsert: {
-              auth0Id,
-            },
-          },
-          {
-            upsert: true,
-          }
-        );
+            {
+              upsert: true,
+              returnOriginal: false,
+            }
+          );
+
+          res.status(200).json({
+            received: true,
+            userProfile,
+          });
+        } catch (error) {
+          console.log('MONGODB ERROR:', error);
+          res.status(500).json({ error: 'Something went wrong' });
+        }
+
+        break;
       };
 
       default: 
-        console.log('UNHABDLED EVENT:', event.type)
+        console.log('UNHABDLED EVENT:', event.type);
+        res.status(200).json({ received: true });
     }
     res.status(200).json({
         received: true
     })
+  } else {
+    console.log("method is not allowed: ", req.method);
+    res.status(405).json({ error: 'Method Not Allowed' });
   }
 };
 

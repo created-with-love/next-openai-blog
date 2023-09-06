@@ -1,10 +1,9 @@
 import { getSession } from "@auth0/nextjs-auth0";
 import stripeInit from 'stripe';
 
-const stripe = stripeInit(process.env.STRIPE_SECRET_KEY);
-
 export default async function handler(req, res) {
   const { user } = await getSession(req, res);
+  const stripe = stripeInit(process.env.STRIPE_SECRET_KEY);
 
   const lineItems = [{
     price: process.env.STRIPE_PRODUCT_PRICE_ID,
